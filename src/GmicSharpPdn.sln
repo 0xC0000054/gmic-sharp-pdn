@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF880308-4B73-438A-BF2B-C39C5CDC8802}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "GmicSharpPdnDocs", "GmicSharpPdnDocs\GmicSharpPdnDocs.shfbproj", "{32B25F24-4C60-4F48-BA28-EE78A1A5EACF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GmicSharpPdn", "GmicSharpPdn.csproj", "{4AE4F478-F32D-4809-BBAF-0DAFBBAD91B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32B25F24-4C60-4F48-BA28-EE78A1A5EACF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32B25F24-4C60-4F48-BA28-EE78A1A5EACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32B25F24-4C60-4F48-BA28-EE78A1A5EACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32B25F24-4C60-4F48-BA28-EE78A1A5EACF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AE4F478-F32D-4809-BBAF-0DAFBBAD91B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AE4F478-F32D-4809-BBAF-0DAFBBAD91B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AE4F478-F32D-4809-BBAF-0DAFBBAD91B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AE4F478-F32D-4809-BBAF-0DAFBBAD91B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E1410CD5-6BD6-4968-A787-9031745A9E05}
+	EndGlobalSection
+EndGlobal
