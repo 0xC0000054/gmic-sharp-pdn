@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+The host application name is now set to `paintdotnet`.
+
 ## v0.1.0
 
 ### Added

@@ -38,7 +38,10 @@ namespace GmicSharpPdn
         /// </summary>
         public PdnGmicSharp()
         {
-            this.gmic = new Gmic<PdnGmicBitmap>(PdnGmicBitmapOutputFactory.Instance);
+            this.gmic = new Gmic<PdnGmicBitmap>(PdnGmicBitmapOutputFactory.Instance)
+            {
+                HostName = "paintdotnet"
+            };
             this.gmic.GmicDone += Gmic_GmicDone;
         }
 
