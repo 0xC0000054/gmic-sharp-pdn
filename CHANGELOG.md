@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-The host application name is now set to `paintdotnet`.
+* The host application name is now set to `paintdotnet`.
+* Improved the exception documentation for `PdnGmicSharp`.
 
 ## v0.1.0
 

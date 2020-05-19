@@ -36,6 +36,7 @@ namespace GmicSharpPdn
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicSharp"/> class.
         /// </summary>
+        /// <exception cref="GmicException">Unable to create the G'MIC image list.</exception>
         public PdnGmicSharp()
         {
             this.gmic = new Gmic<PdnGmicBitmap>(PdnGmicBitmapOutputFactory.Instance)
@@ -86,6 +87,7 @@ namespace GmicSharpPdn
         /// <param name="bitmap">The bitmap.</param>
         /// <exception cref="ArgumentNullException"><paramref name="bitmap"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        /// <exception cref="OutOfMemoryException">Insufficient memory to add the image.</exception>
         public void AddInputImage(PdnGmicBitmap bitmap)
         {
             this.gmic.AddInputImage(bitmap);
@@ -98,6 +100,7 @@ namespace GmicSharpPdn
         /// <param name="name">The bitmap name.</param>
         /// <exception cref="ArgumentNullException"><paramref name="bitmap"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        /// <exception cref="OutOfMemoryException">Insufficient memory to add the image.</exception>
         public void AddInputImage(PdnGmicBitmap bitmap, string name)
         {
             VerifyNotDisposed();
