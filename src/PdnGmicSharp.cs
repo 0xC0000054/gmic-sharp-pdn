@@ -13,7 +13,6 @@
 using GmicSharp;
 using PaintDotNet;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace GmicSharpPdn
@@ -26,12 +25,12 @@ namespace GmicSharpPdn
     public sealed class PdnGmicSharp : Disposable
     {
         private Gmic<PdnGmicBitmap> gmic;
+        private OutputImageCollection<PdnGmicBitmap> outputImages;
         private ManualResetEventSlim gmicDoneResetEvent;
         private Timer timer;
         private object timerCookie;
         private int inTimerCallback;
         private Func<bool> cancelPollFn;
-        private CancellationTokenSource tokenSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicSharp"/> class.
@@ -43,7 +42,7 @@ namespace GmicSharpPdn
             {
                 HostName = "paintdotnet"
             };
-            this.gmic.GmicDone += Gmic_GmicDone;
+            this.gmic.RunGmicCompleted += Gmic_RunGmicCompleted;
         }
 
         /// <summary>
@@ -59,9 +58,7 @@ namespace GmicSharpPdn
             {
                 VerifyNotDisposed();
 
-                IReadOnlyList<PdnGmicBitmap> outputImages = this.gmic.OutputImages;
-
-                return outputImages.Count > 0 ? outputImages[0] : null;
+                return this.outputImages != null && this.outputImages.Count > 0 ? this.outputImages[0] : null;
             }
         }
 
@@ -140,6 +137,12 @@ namespace GmicSharpPdn
                 // will never be called if this method throws an exception.
                 StopCancellationTimer();
 
+                if (this.outputImages != null)
+                {
+                    this.outputImages.Dispose();
+                    this.outputImages = null;
+                }
+
                 if (cancelPollFn != null)
                 {
                     if (cancelPollFn())
@@ -149,19 +152,14 @@ namespace GmicSharpPdn
                     }
 
                     this.cancelPollFn = cancelPollFn;
-                    this.tokenSource = new CancellationTokenSource();
                     this.timerCookie = new object();
                     this.timer = new Timer(OnTimerTick, this.timerCookie, 1000, 500);
                 }
 
-                this.gmic.RunGmic(command, this.tokenSource?.Token ?? CancellationToken.None);
+                this.gmic.RunGmicAsync(command);
 
                 // Wait until G'MIC finishes.
                 this.gmicDoneResetEvent.Wait();
-            }
-            catch (OperationCanceledException)
-            {
-                this.Canceled = true;
             }
             catch (Exception ex)
             {
@@ -192,10 +190,10 @@ namespace GmicSharpPdn
                     this.gmicDoneResetEvent = null;
                 }
 
-                if (this.tokenSource != null)
+                if (this.outputImages != null)
                 {
-                    this.tokenSource.Dispose();
-                    this.tokenSource = null;
+                    this.outputImages.Dispose();
+                    this.outputImages = null;
                 }
 
                 if (this.timer != null)
@@ -208,12 +206,13 @@ namespace GmicSharpPdn
             base.Dispose(disposing);
         }
 
-        private void Gmic_GmicDone(object sender, GmicCompletedEventArgs e)
+        private void Gmic_RunGmicCompleted(object sender, RunGmicCompletedEventArgs<PdnGmicBitmap> e)
         {
             StopCancellationTimer();
 
-            this.Canceled = e.Canceled;
+            this.Canceled = e.Cancelled;
             this.Error = e.Error;
+            this.outputImages = e.OutputImages;
 
             this.gmicDoneResetEvent?.Set();
         }
@@ -234,14 +233,7 @@ namespace GmicSharpPdn
 
             if (this.cancelPollFn?.Invoke() ?? false)
             {
-                try
-                {
-                    this.tokenSource?.Cancel();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // A timer could call this method after it has been disposed on another thread.
-                }
+                this.gmic.RunGmicAsyncCancel();
             }
 
             this.inTimerCallback = 0;
@@ -251,12 +243,6 @@ namespace GmicSharpPdn
         {
             this.timerCookie = null;
             this.cancelPollFn = null;
-
-            if (this.tokenSource != null)
-            {
-                this.tokenSource.Dispose();
-                this.tokenSource = null;
-            }
 
             if (this.timer != null)
             {
