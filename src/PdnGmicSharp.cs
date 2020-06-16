@@ -13,6 +13,7 @@
 using GmicSharp;
 using PaintDotNet;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace GmicSharpPdn
@@ -46,19 +47,19 @@ namespace GmicSharpPdn
         }
 
         /// <summary>
-        /// Gets the output image.
+        /// Gets the output images.
         /// </summary>
         /// <value>
-        /// The output image.
+        /// The output images.
         /// </value>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        public PdnGmicBitmap Output
+        public IReadOnlyList<PdnGmicBitmap> OutputImages
         {
             get
             {
                 VerifyNotDisposed();
 
-                return this.outputImages != null && this.outputImages.Count > 0 ? this.outputImages[0] : null;
+                return this.outputImages;
             }
         }
 
