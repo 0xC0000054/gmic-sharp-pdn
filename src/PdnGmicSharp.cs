@@ -88,6 +88,8 @@ namespace GmicSharpPdn
         /// <exception cref="OutOfMemoryException">Insufficient memory to add the image.</exception>
         public void AddInputImage(PdnGmicBitmap bitmap)
         {
+            VerifyNotDisposed();
+
             this.gmic.AddInputImage(bitmap);
         }
 
