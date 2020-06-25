@@ -47,6 +47,22 @@ namespace GmicSharpPdn
         }
 
         /// <summary>
+        /// Gets a value indicating whether G'MIC was canceled.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if G'MIC was canceled; otherwise, <c>false</c>.
+        /// </value>
+        public bool Canceled { get; private set; }
+
+        /// <summary>
+        /// Gets the error that occurred when running G'MIC.
+        /// </summary>
+        /// <value>
+        /// The error that occurred when running G'MIC.
+        /// </value>
+        public Exception Error { get; private set; }
+
+        /// <summary>
         /// Gets the output images.
         /// </summary>
         /// <value>
@@ -62,22 +78,6 @@ namespace GmicSharpPdn
                 return this.outputImages;
             }
         }
-
-        /// <summary>
-        /// Gets a value indicating whether G'MIC was canceled.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if G'MIC was canceled; otherwise, <c>false</c>.
-        /// </value>
-        public bool Canceled { get; private set; }
-
-        /// <summary>
-        /// Gets the error that occurred when running G'MIC.
-        /// </summary>
-        /// <value>
-        /// The error that occurred when running G'MIC.
-        /// </value>
-        public Exception Error { get; private set; }
 
         /// <summary>
         /// Adds the input image.
