@@ -26,7 +26,6 @@ namespace GmicSharpPdn
 #pragma warning disable IDE0032 // Use auto property
         private Surface surface;
 #pragma warning restore IDE0032 // Use auto property
-        private readonly bool hasTransparency;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicBitmap"/> class.
@@ -61,7 +60,6 @@ namespace GmicSharpPdn
             {
                 this.surface = surface.Clone();
             }
-            this.hasTransparency = HasTransparency(surface);
         }
 
         /// <summary>
@@ -72,7 +70,6 @@ namespace GmicSharpPdn
         internal PdnGmicBitmap(int width, int height)
         {
             this.surface = new Surface(width, height);
-            this.hasTransparency = true;
         }
 
         /// <summary>
@@ -115,27 +112,246 @@ namespace GmicSharpPdn
         /// </returns>
         public override GmicPixelFormat GetGmicPixelFormat()
         {
-            return this.hasTransparency ? GmicPixelFormat.Bgra32 : GmicPixelFormat.Bgr32;
+            AnalyzeSurfaceResult result = AnalyzeSurface();
+            GmicPixelFormat gmicPixelFormat;
+
+            if (result.HasTransparency)
+            {
+                gmicPixelFormat = result.IsGrayscale ? GmicPixelFormat.GrayAlpha16 : GmicPixelFormat.Rgba32;
+            }
+            else
+            {
+                gmicPixelFormat = result.IsGrayscale ? GmicPixelFormat.Gray8 : GmicPixelFormat.Rgb24;
+            }
+
+            return gmicPixelFormat;
         }
 
         /// <summary>
-        /// Locks the bitmap in memory for unsafe access to the pixel data.
+        /// Copies the pixel data from a G'MIC image that uses a gray-scale format into this instance.
         /// </summary>
-        /// <returns>
-        /// A <see cref="T:GmicSharp.GmicBitmapLock" /> instance.
-        /// </returns>
-        public override GmicBitmapLock Lock()
+        /// <param name="grayPlane">The gray plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyFromGmicImageGray(float* grayPlane, int planeStride)
         {
-            VerifyNotDisposed();
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                float* src = grayPlane + (y * planeStride);
+                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
 
-            return new GmicBitmapLock(this.surface.Scan0.Pointer, this.surface.Stride);
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    dst->R = dst->G = dst->B = GmicFloatToByte(*src);
+                    dst->A = 255;
+
+                    src++;
+                    dst++;
+                }
+            }
         }
 
         /// <summary>
-        /// Unlocks the bitmap.
+        /// Copies the pixel data from a G'MIC image that uses a gray-scale with alpha format into this instance.
         /// </summary>
-        public override void Unlock()
+        /// <param name="grayPlane">The gray plane.</param>
+        /// <param name="alphaPlane">The alpha plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyFromGmicImageGrayAlpha(float* grayPlane, float* alphaPlane, int planeStride)
         {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                float* src = grayPlane + (y * planeStride);
+                float* srcAlpha = alphaPlane + (y * planeStride);
+                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    dst->R = dst->G = dst->B = GmicFloatToByte(*src);
+                    dst->A = GmicFloatToByte(*srcAlpha);
+
+                    src++;
+                    srcAlpha++;
+                    dst++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the pixel data from a G'MIC image that uses a RGB format into this instance.
+        /// </summary>
+        /// <param name="redPlane">The red plane.</param>
+        /// <param name="greenPlane">The green plane.</param>
+        /// <param name="bluePlane">The blue plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyFromGmicImageRGB(float* redPlane, float* greenPlane, float* bluePlane, int planeStride)
+        {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                float* srcR = redPlane + (y * planeStride);
+                float* srcG = greenPlane + (y * planeStride);
+                float* srcB = bluePlane + (y * planeStride);
+                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    dst->R = GmicFloatToByte(*srcR);
+                    dst->G = GmicFloatToByte(*srcG);
+                    dst->B = GmicFloatToByte(*srcB);
+                    dst->A = 255;
+
+                    srcR++;
+                    srcG++;
+                    srcB++;
+                    dst++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the pixel data from a G'MIC image that uses a RGBA format into this instance.
+        /// </summary>
+        /// <param name="redPlane">The red plane.</param>
+        /// <param name="greenPlane">The green plane.</param>
+        /// <param name="bluePlane">The blue plane.</param>
+        /// <param name="alphaPlane">The alpha plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyFromGmicImageRGBA(float* redPlane, float* greenPlane, float* bluePlane, float* alphaPlane, int planeStride)
+        {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                float* srcR = redPlane + (y * planeStride);
+                float* srcG = greenPlane + (y * planeStride);
+                float* srcB = bluePlane + (y * planeStride);
+                float* srcA = alphaPlane + (y * planeStride);
+                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    dst->R = GmicFloatToByte(*srcR);
+                    dst->G = GmicFloatToByte(*srcG);
+                    dst->B = GmicFloatToByte(*srcB);
+                    dst->A = GmicFloatToByte(*srcA);
+
+                    srcR++;
+                    srcG++;
+                    srcB++;
+                    srcA++;
+                    dst++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the pixel data from this instance into a G'MIC image that uses a gray-scale format.
+        /// </summary>
+        /// <param name="grayPlane">The gray plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyToGmicImageGray(float* grayPlane, int planeStride)
+        {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                float* dstGray = grayPlane + (y * planeStride);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    *dstGray = ByteToGmicFloat(src->R);
+
+                    dstGray++;
+                    src++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the pixel data from this instance into a G'MIC image that uses a gray-scale with alpha format.
+        /// </summary>
+        /// <param name="grayPlane">The gray plane.</param>
+        /// <param name="alphaPlane">The alpha plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyToGmicImageGrayAlpha(float* grayPlane, float* alphaPlane, int planeStride)
+        {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                float* dstGray = grayPlane + (y * planeStride);
+                float* dstAlpha = alphaPlane + (y * planeStride);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    *dstGray = ByteToGmicFloat(src->R);
+                    *dstAlpha = ByteToGmicFloat(src->A);
+
+                    dstGray++;
+                    dstAlpha++;
+                    src++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the pixel data from this instance into a G'MIC image that uses a RGB format.
+        /// </summary>
+        /// <param name="redPlane">The red plane.</param>
+        /// <param name="greenPlane">The green plane.</param>
+        /// <param name="bluePlane">The blue plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyToGmicImageRGB(float* redPlane, float* greenPlane, float* bluePlane, int planeStride)
+        {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                float* dstR = redPlane + (y * planeStride);
+                float* dstG = greenPlane + (y * planeStride);
+                float* dstB = bluePlane + (y * planeStride);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    *dstR = ByteToGmicFloat(src->R);
+                    *dstG = ByteToGmicFloat(src->G);
+                    *dstB = ByteToGmicFloat(src->B);
+
+                    dstR++;
+                    dstG++;
+                    dstB++;
+                    src++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies the pixel data from this instance into a G'MIC image that uses a RGBA format.
+        /// </summary>
+        /// <param name="redPlane">The red plane.</param>
+        /// <param name="greenPlane">The green plane.</param>
+        /// <param name="bluePlane">The blue plane.</param>
+        /// <param name="alphaPlane">The alpha plane.</param>
+        /// <param name="planeStride">The plane stride.</param>
+        protected override unsafe void CopyToGmicImageRGBA(float* redPlane, float* greenPlane, float* bluePlane, float* alphaPlane, int planeStride)
+        {
+            for (int y = 0; y < this.surface.Height; y++)
+            {
+                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                float* dstR = redPlane + (y * planeStride);
+                float* dstG = greenPlane + (y * planeStride);
+                float* dstB = bluePlane + (y * planeStride);
+                float* dstA = alphaPlane + (y * planeStride);
+
+                for (int x = 0; x < this.surface.Width; x++)
+                {
+                    *dstR = ByteToGmicFloat(src->R);
+                    *dstG = ByteToGmicFloat(src->G);
+                    *dstB = ByteToGmicFloat(src->B);
+                    *dstA = ByteToGmicFloat(src->A);
+
+
+                    dstR++;
+                    dstG++;
+                    dstB++;
+                    dstA++;
+                    src++;
+                }
+            }
         }
 
         /// <summary>
@@ -156,25 +372,33 @@ namespace GmicSharpPdn
             base.Dispose(disposing);
         }
 
-        private static unsafe bool HasTransparency(Surface surface)
+        private unsafe AnalyzeSurfaceResult AnalyzeSurface()
         {
-            for (int y = 0; y < surface.Height; y++)
+            bool hasTransparency = false;
+            bool isGrayscale = true;
+
+            for (int y = 0; y < this.surface.Height; y++)
             {
-                ColorBgra* ptr = surface.GetRowAddressUnchecked(y);
-                ColorBgra* ptrEnd = ptr + surface.Width;
+                ColorBgra* ptr = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* ptrEnd = ptr + this.surface.Width;
 
                 while (ptr < ptrEnd)
                 {
                     if (ptr->A < 255)
                     {
-                        return true;
+                        hasTransparency = true;
+                    }
+
+                    if (!(ptr->R == ptr->G && ptr->G == ptr->B))
+                    {
+                        isGrayscale = false;
                     }
 
                     ptr++;
                 }
             }
 
-            return false;
+            return new AnalyzeSurfaceResult(hasTransparency, isGrayscale);
         }
 
         private void VerifyNotDisposed()
@@ -183,6 +407,19 @@ namespace GmicSharpPdn
             {
                 ExceptionUtil.ThrowObjectDisposedException(nameof(PdnGmicBitmap));
             }
+        }
+
+        private readonly struct AnalyzeSurfaceResult
+        {
+            public AnalyzeSurfaceResult(bool hasTransparency, bool isGrayscale)
+            {
+                this.HasTransparency = hasTransparency;
+                this.IsGrayscale = isGrayscale;
+            }
+
+            public bool HasTransparency { get; }
+
+            public bool IsGrayscale { get; }
         }
     }
 }
