@@ -15,6 +15,7 @@ using PaintDotNet;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GmicSharpPdn
 {
@@ -27,11 +28,7 @@ namespace GmicSharpPdn
     {
         private Gmic<PdnGmicBitmap> gmic;
         private OutputImageCollection<PdnGmicBitmap> outputImages;
-        private ManualResetEventSlim gmicDoneResetEvent;
-        private Timer timer;
-        private object timerCookie;
-        private int inTimerCallback;
-        private Func<bool> cancelPollFn;
+        private CallbackToCancellationTokenAdapter cancellationAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicSharp"/> class.
@@ -43,7 +40,6 @@ namespace GmicSharpPdn
             {
                 HostName = "paintdotnet"
             };
-            this.gmic.RunGmicCompleted += Gmic_RunGmicCompleted;
         }
 
         /// <summary>
@@ -128,18 +124,11 @@ namespace GmicSharpPdn
         {
             VerifyNotDisposed();
 
-            this.gmicDoneResetEvent?.Dispose();
-            this.gmicDoneResetEvent = new ManualResetEventSlim();
             this.Canceled = false;
             this.Error = null;
 
             try
             {
-                // Cleanup any previous cancellation poll fields.
-                // Normally this would be done by the Gmic_GmicDone method, but Gmic_GmicDone
-                // will never be called if this method throws an exception.
-                StopCancellationTimer();
-
                 if (this.outputImages != null)
                 {
                     this.outputImages.Dispose();
@@ -154,19 +143,41 @@ namespace GmicSharpPdn
                         return;
                     }
 
-                    this.cancelPollFn = cancelPollFn;
-                    this.timerCookie = new object();
-                    this.timer = new Timer(OnTimerTick, this.timerCookie, 1000, 500);
+                    this.cancellationAdapter = new CallbackToCancellationTokenAdapter(cancelPollFn);
                 }
 
-                this.gmic.RunGmicAsync(command);
+                CancellationToken cancellationToken = this.cancellationAdapter?.Token ?? CancellationToken.None;
 
-                // Wait until G'MIC finishes.
-                this.gmicDoneResetEvent.Wait();
+                Task<OutputImageCollection<PdnGmicBitmap>> task = this.gmic.RunGmicTaskAsync(command, cancellationToken);
+
+                // Using WaitAny allows any exception that occurred
+                // during the task execution to be examined.
+                Task.WaitAny(task);
+
+                if (task.IsFaulted)
+                {
+                    this.Error = task.Exception.GetBaseException();
+                }
+                else if (task.IsCanceled)
+                {
+                    this.Canceled = true;
+                }
+                else
+                {
+                    this.outputImages = task.Result;
+                }
             }
             catch (Exception ex)
             {
                 this.Error = ex;
+            }
+            finally
+            {
+                if (this.cancellationAdapter != null)
+                {
+                    this.cancellationAdapter.Dispose();
+                    this.cancellationAdapter = null;
+                }
             }
         }
 
@@ -178,19 +189,16 @@ namespace GmicSharpPdn
         {
             if (disposing)
             {
-                this.timerCookie = null;
-                this.cancelPollFn = null;
-
                 if (this.gmic != null)
                 {
                     this.gmic.Dispose();
                     this.gmic = null;
                 }
 
-                if (this.gmicDoneResetEvent != null)
+                if (this.cancellationAdapter != null)
                 {
-                    this.gmicDoneResetEvent.Dispose();
-                    this.gmicDoneResetEvent = null;
+                    this.cancellationAdapter.Dispose();
+                    this.cancellationAdapter = null;
                 }
 
                 if (this.outputImages != null)
@@ -198,60 +206,9 @@ namespace GmicSharpPdn
                     this.outputImages.Dispose();
                     this.outputImages = null;
                 }
-
-                if (this.timer != null)
-                {
-                    this.timer.Dispose();
-                    this.timer = null;
-                }
             }
 
             base.Dispose(disposing);
-        }
-
-        private void Gmic_RunGmicCompleted(object sender, RunGmicCompletedEventArgs<PdnGmicBitmap> e)
-        {
-            StopCancellationTimer();
-
-            this.Canceled = e.Cancelled;
-            this.Error = e.Error;
-            this.outputImages = e.OutputImages;
-
-            this.gmicDoneResetEvent?.Set();
-        }
-
-        private void OnTimerTick(object state)
-        {
-            // The timer has been stopped.
-            if (state != this.timerCookie)
-            {
-                return;
-            }
-
-            // Detect reentrant calls to this method.
-            if (Interlocked.CompareExchange(ref this.inTimerCallback, 1, 0) != 0)
-            {
-                return;
-            }
-
-            if (this.cancelPollFn?.Invoke() ?? false)
-            {
-                this.gmic.RunGmicAsyncCancel();
-            }
-
-            this.inTimerCallback = 0;
-        }
-
-        private void StopCancellationTimer()
-        {
-            this.timerCookie = null;
-            this.cancelPollFn = null;
-
-            if (this.timer != null)
-            {
-                this.timer.Dispose();
-                this.timer = null;
-            }
         }
 
         private void VerifyNotDisposed()

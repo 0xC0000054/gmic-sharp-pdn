@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallbackToCancellationTokenAdapter.cs" />
     <Compile Include="PdnGmicSharp.cs" />
     <Compile Include="PdnGmicBitmap.cs" />
     <Compile Include="PdnGmicBitmapOutputFactory.cs" />
