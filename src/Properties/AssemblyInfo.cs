@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("GmicSharpPdn")]
-[assembly: AssemblyCopyright("Copyright ©  2020 Nicholas Hayes")]
+[assembly: AssemblyCopyright("Copyright © 2020 Nicholas Hayes")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
