@@ -34,7 +34,7 @@ This was done to match the licenses used by [libgmic](https://github.com/dtschum
 * gmic-sharp
 * [Sandcastle Help File Builder](https://github.com/EWSoftware/SHFB) is required to build the documentation	
 
-## Building the plugin
+## Building the library
 
 * Open the solution
 * Change the PaintDotNet references in the GmicSharpPdn project to match your Paint.NET install location
