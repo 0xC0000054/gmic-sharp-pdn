@@ -24,3 +24,21 @@ The gmic-sharp native libraries (GmicSharpNative*) are dual-licensed under the t
 Pick the one you want to use.
 
 This was done to match the licenses used by [libgmic](https://github.com/dtschump/gmic).
+
+# Source code
+
+## Prerequisites
+
+* Visual Studio 2019
+* Paint.NET 4.2.14 or later
+* gmic-sharp
+* [Sandcastle Help File Builder](https://github.com/EWSoftware/SHFB) is required to build the documentation	
+
+## Building the plugin
+
+* Open the solution
+* Change the PaintDotNet references in the GmicSharpPdn project to match your Paint.NET install location
+* Change the GmicSharp reference in the GmicSharpPdn project to match your GmicSharp install location
+* Update the post build events to copy the build output to the Paint.NET FileTypes folder
+* Build the solution
+
