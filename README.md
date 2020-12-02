@@ -39,6 +39,6 @@ This was done to match the licenses used by [libgmic](https://github.com/dtschum
 * Open the solution
 * Change the PaintDotNet references in the GmicSharpPdn project to match your Paint.NET install location
 * Change the GmicSharp reference in the GmicSharpPdn project to match your GmicSharp install location
-* Update the post build events to copy the build output to the Paint.NET FileTypes folder
+* Update the post build events to copy the build output to the Paint.NET Effects folder
 * Build the solution
 
