@@ -137,7 +137,7 @@ namespace GmicSharpPdn
             for (int y = 0; y < this.surface.Height; y++)
             {
                 float* src = grayPlane + (y * planeStride);
-                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* dst = this.surface.GetRowPointerUnchecked(y);
 
                 for (int x = 0; x < this.surface.Width; x++)
                 {
@@ -162,7 +162,7 @@ namespace GmicSharpPdn
             {
                 float* src = grayPlane + (y * planeStride);
                 float* srcAlpha = alphaPlane + (y * planeStride);
-                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* dst = this.surface.GetRowPointerUnchecked(y);
 
                 for (int x = 0; x < this.surface.Width; x++)
                 {
@@ -190,7 +190,7 @@ namespace GmicSharpPdn
                 float* srcR = redPlane + (y * planeStride);
                 float* srcG = greenPlane + (y * planeStride);
                 float* srcB = bluePlane + (y * planeStride);
-                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* dst = this.surface.GetRowPointerUnchecked(y);
 
                 for (int x = 0; x < this.surface.Width; x++)
                 {
@@ -223,7 +223,7 @@ namespace GmicSharpPdn
                 float* srcG = greenPlane + (y * planeStride);
                 float* srcB = bluePlane + (y * planeStride);
                 float* srcA = alphaPlane + (y * planeStride);
-                ColorBgra* dst = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* dst = this.surface.GetRowPointerUnchecked(y);
 
                 for (int x = 0; x < this.surface.Width; x++)
                 {
@@ -250,7 +250,7 @@ namespace GmicSharpPdn
         {
             for (int y = 0; y < this.surface.Height; y++)
             {
-                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* src = this.surface.GetRowPointerUnchecked(y);
                 float* dstGray = grayPlane + (y * planeStride);
 
                 for (int x = 0; x < this.surface.Width; x++)
@@ -273,7 +273,7 @@ namespace GmicSharpPdn
         {
             for (int y = 0; y < this.surface.Height; y++)
             {
-                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* src = this.surface.GetRowPointerUnchecked(y);
                 float* dstGray = grayPlane + (y * planeStride);
                 float* dstAlpha = alphaPlane + (y * planeStride);
 
@@ -300,7 +300,7 @@ namespace GmicSharpPdn
         {
             for (int y = 0; y < this.surface.Height; y++)
             {
-                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* src = this.surface.GetRowPointerUnchecked(y);
                 float* dstR = redPlane + (y * planeStride);
                 float* dstG = greenPlane + (y * planeStride);
                 float* dstB = bluePlane + (y * planeStride);
@@ -331,7 +331,7 @@ namespace GmicSharpPdn
         {
             for (int y = 0; y < this.surface.Height; y++)
             {
-                ColorBgra* src = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* src = this.surface.GetRowPointerUnchecked(y);
                 float* dstR = redPlane + (y * planeStride);
                 float* dstG = greenPlane + (y * planeStride);
                 float* dstB = bluePlane + (y * planeStride);
@@ -379,7 +379,7 @@ namespace GmicSharpPdn
 
             for (int y = 0; y < this.surface.Height; y++)
             {
-                ColorBgra* ptr = this.surface.GetRowAddressUnchecked(y);
+                ColorBgra* ptr = this.surface.GetRowPointerUnchecked(y);
                 ColorBgra* ptrEnd = ptr + this.surface.Width;
 
                 while (ptr < ptrEnd)
