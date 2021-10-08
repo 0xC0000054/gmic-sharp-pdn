@@ -3,7 +3,7 @@
 // This file is part of gmic-sharp-pdn, a library that extends
 // gmic-sharp for use with Paint.NET Effect plugins.
 //
-// Copyright (c) 2020 Nicholas Hayes
+// Copyright (c) 2020, 2021 Nicholas Hayes
 //
 // This file is licensed under the MIT License.
 // See LICENSE.txt for complete licensing and attribution information.
@@ -22,7 +22,7 @@ using System.Runtime.Versioning;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("GmicSharpPdn")]
-[assembly: AssemblyCopyright("Copyright © 2020 Nicholas Hayes")]
+[assembly: AssemblyCopyright("Copyright © 2021 Nicholas Hayes")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
