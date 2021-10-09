@@ -13,6 +13,7 @@
 using GmicSharp;
 using PaintDotNet;
 using System;
+using System.Drawing;
 
 namespace GmicSharpPdn
 {
@@ -103,6 +104,32 @@ namespace GmicSharpPdn
         /// The bitmap height.
         /// </value>
         public override int Height => this.surface.Height;
+
+        /// <summary>
+        /// Creates a <see cref="PdnGmicBitmap"/> from the pixels in the selected area.
+        /// </summary>
+        /// <param name="effectEnvironmentParameters">The effect environment parameters.</param>
+        /// <returns>A <see cref="PdnGmicBitmap"/> containing the pixels in the selected area.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="effectEnvironmentParameters"/> is null.
+        /// </exception>
+        public static PdnGmicBitmap FromSelection(PaintDotNet.Effects.EffectEnvironmentParameters effectEnvironmentParameters)
+        {
+            if (effectEnvironmentParameters is null)
+            {
+                ExceptionUtil.ThrowArgumentNullException(nameof(effectEnvironmentParameters));
+            }
+
+            Surface sourceSurface = effectEnvironmentParameters.SourceSurface;
+            PdnRegion selection = effectEnvironmentParameters.GetSelectionAsPdnRegion();
+
+            Rectangle selectionBounds = selection.GetBoundsInt();
+
+            PdnGmicBitmap bitmap = new(selectionBounds.Width, selectionBounds.Height);
+            bitmap.surface.CopySurface(sourceSurface, selection);
+
+            return bitmap;
+        }
 
         /// <summary>
         /// Gets the G'MIC pixel format.
