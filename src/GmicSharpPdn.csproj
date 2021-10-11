@@ -13,7 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GmicSharp">
-      <HintPath>..\..\GmicSharp\src\bin\Release\netstandard2.1\GmicSharp.dll</HintPath>
+      <HintPath>..\..\GmicSharp\src\bin\Release\net5\GmicSharp.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Base">
       <HintPath>..\..\..\..\..\..\..\Program Files\paint.net\PaintDotNet.Base.dll</HintPath>
