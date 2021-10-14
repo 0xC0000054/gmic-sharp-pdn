@@ -28,7 +28,6 @@ namespace GmicSharpPdn
     {
         private Gmic<PdnGmicBitmap> gmic;
         private OutputImageCollection<PdnGmicBitmap> outputImages;
-        private CallbackToCancellationTokenAdapter cancellationAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicSharp"/> class.
@@ -127,6 +126,7 @@ namespace GmicSharpPdn
             this.Canceled = false;
             this.Error = null;
 
+            CallbackToCancellationTokenAdapter cancellationAdapter = null;
             try
             {
                 if (this.outputImages != null)
@@ -143,10 +143,10 @@ namespace GmicSharpPdn
                         return;
                     }
 
-                    this.cancellationAdapter = new CallbackToCancellationTokenAdapter(cancelPollFn);
+                    cancellationAdapter = new CallbackToCancellationTokenAdapter(cancelPollFn);
                 }
 
-                CancellationToken cancellationToken = this.cancellationAdapter?.Token ?? CancellationToken.None;
+                CancellationToken cancellationToken = cancellationAdapter?.Token ?? CancellationToken.None;
 
                 Task<OutputImageCollection<PdnGmicBitmap>> task = this.gmic.RunGmicTaskAsync(command, cancellationToken);
 
@@ -173,11 +173,7 @@ namespace GmicSharpPdn
             }
             finally
             {
-                if (this.cancellationAdapter != null)
-                {
-                    this.cancellationAdapter.Dispose();
-                    this.cancellationAdapter = null;
-                }
+                cancellationAdapter?.Dispose();
             }
         }
 
@@ -193,12 +189,6 @@ namespace GmicSharpPdn
                 {
                     this.gmic.Dispose();
                     this.gmic = null;
-                }
-
-                if (this.cancellationAdapter != null)
-                {
-                    this.cancellationAdapter.Dispose();
-                    this.cancellationAdapter = null;
                 }
 
                 if (this.outputImages != null)
