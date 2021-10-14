@@ -24,9 +24,7 @@ namespace GmicSharpPdn
     /// <seealso cref="GmicBitmap" />
     public sealed class PdnGmicBitmap : GmicBitmap
     {
-#pragma warning disable IDE0032 // Use auto property
         private Surface surface;
-#pragma warning restore IDE0032 // Use auto property
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicBitmap"/> class.
