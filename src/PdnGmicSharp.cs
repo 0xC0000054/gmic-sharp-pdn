@@ -28,6 +28,7 @@ namespace GmicSharpPdn
     {
         private Gmic<PdnGmicBitmap> gmic;
         private OutputImageCollection<PdnGmicBitmap> outputImages;
+        private List<PdnGmicBitmap> inputImages;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdnGmicSharp"/> class.
@@ -39,6 +40,7 @@ namespace GmicSharpPdn
             {
                 HostName = "paintdotnet"
             };
+            this.inputImages = new List<PdnGmicBitmap>();
         }
 
         /// <summary>
@@ -83,24 +85,14 @@ namespace GmicSharpPdn
         /// <exception cref="OutOfMemoryException">Insufficient memory to add the image.</exception>
         public void AddInputImage(PdnGmicBitmap bitmap)
         {
+            if (bitmap == null)
+            {
+                ExceptionUtil.ThrowArgumentNullException(nameof(bitmap));
+            }
+
             VerifyNotDisposed();
 
-            this.gmic.AddInputImage(bitmap);
-        }
-
-        /// <summary>
-        /// Adds the input image.
-        /// </summary>
-        /// <param name="bitmap">The bitmap.</param>
-        /// <param name="name">The bitmap name.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="bitmap"/> is null.</exception>
-        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        /// <exception cref="OutOfMemoryException">Insufficient memory to add the image.</exception>
-        public void AddInputImage(PdnGmicBitmap bitmap, string name)
-        {
-            VerifyNotDisposed();
-
-            this.gmic.AddInputImage(bitmap, name);
+            this.inputImages.Add(bitmap.Clone());
         }
 
         /// <summary>
@@ -148,7 +140,7 @@ namespace GmicSharpPdn
 
                 CancellationToken cancellationToken = cancellationAdapter?.Token ?? CancellationToken.None;
 
-                Task<OutputImageCollection<PdnGmicBitmap>> task = this.gmic.RunGmicTaskAsync(command, cancellationToken);
+                Task<OutputImageCollection<PdnGmicBitmap>> task = this.gmic.RunGmicAsync(command, this.inputImages, cancellationToken);
 
                 // Using WaitAny allows any exception that occurred
                 // during the task execution to be examined.
@@ -185,10 +177,9 @@ namespace GmicSharpPdn
         {
             if (disposing)
             {
-                if (this.gmic != null)
+                for (int i = 0; i < this.inputImages.Count; i++)
                 {
-                    this.gmic.Dispose();
-                    this.gmic = null;
+                    this.inputImages[i]?.Dispose();
                 }
 
                 if (this.outputImages != null)

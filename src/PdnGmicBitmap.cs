@@ -71,6 +71,8 @@ namespace GmicSharpPdn
             this.surface = new Surface(width, height);
         }
 
+        private PdnGmicBitmap(PdnGmicBitmap cloneMe) => this.surface = cloneMe.surface.Clone();
+
         /// <summary>
         /// Gets the surface.
         /// </summary>
@@ -150,6 +152,17 @@ namespace GmicSharpPdn
             }
 
             return gmicPixelFormat;
+        }
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns>A clone of this instance.</returns>
+        internal PdnGmicBitmap Clone()
+        {
+            VerifyNotDisposed();
+
+            return new PdnGmicBitmap(this);
         }
 
         /// <summary>

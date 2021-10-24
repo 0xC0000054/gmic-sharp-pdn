@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 A `FromSelection` method to the `PdnGmicBitmap` class.
 
+### Removed
+
+* The `AddInputImage(PdnGmicBitmap, string)` overload.
+  * It has been replaced by the `Name` property in the `PdnGmicBitmap` class.
+
 ## v0.2.0 - 2020-07-14
 
 ### Added
